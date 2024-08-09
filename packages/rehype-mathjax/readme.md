@@ -337,7 +337,7 @@ abide by its terms.
 
 [license]: https://github.com/remarkjs/remark-math/blob/main/license
 
-[author]: https://rokt33r.github.io
+[author]: https://github.com/tani
 
 [katex]: https://github.com/Khan/KaTeX
 
