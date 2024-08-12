@@ -163,6 +163,12 @@ Configuration (TypeScript type).
     — configuration for the input TeX;
     see [*TeX Input Processor Options* on
     `mathjax.org`][mathjax-tex-options]
+*   `stylesheet`
+    (`{ insertType: 'internal'|'inline'|'none'|null|undefined }`, optional)
+    —  how to insert the stylesheet;  Default: `'internal'`.
+    *   `'internal'`: in a `<style>` element.  If possible, in the `<head>`.
+    *   `'inline'`: in a `style` attribute.  (SVG only)
+    *   `'none'`: do not include styles.
 
 ###### Notes
 

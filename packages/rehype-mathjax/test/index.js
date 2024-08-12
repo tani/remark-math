@@ -65,6 +65,59 @@ test('rehype-mathjax', async function (t) {
     )
   })
 
+  await t.test('should render SVG with options', async function () {
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxSvg, {stylesheet: {insertType: 'internal'}})
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-svg.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxSvg, {stylesheet: {insertType: null}})
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-svg.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxSvg, {stylesheet: {insertType: undefined}})
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-svg.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxSvg, {stylesheet: {insertType: 'inline'}})
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-svg-inline.html', base)))
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxSvg, {stylesheet: {insertType: 'none'}})
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-svg-none.html', base)))
+    )
+  })
+
   await t.test('should crash for CHTML w/o `fontURL`', async function () {
     try {
       await unified()
@@ -93,6 +146,61 @@ test('rehype-mathjax', async function (t) {
           .process(await fs.readFile(new URL('small.html', base)))
       ),
       String(await fs.readFile(new URL('small-chtml.html', base))).trim()
+    )
+  })
+
+  await t.test('should render CHTML with options', async function () {
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxChtml, {
+            chtml: {fontURL: 'place/to/fonts'},
+            stylesheet: {insertType: 'internal'}
+          })
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-chtml.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxChtml, {
+            chtml: {fontURL: 'place/to/fonts'},
+            stylesheet: {insertType: undefined}
+          })
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-chtml.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxChtml, {
+            chtml: {fontURL: 'place/to/fonts'},
+            stylesheet: {insertType: null}
+          })
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-chtml.html', base))).trim()
+    )
+    assert.equal(
+      String(
+        await unified()
+          .use(rehypeParse, {fragment: true})
+          .use(rehypeMathJaxChtml, {
+            chtml: {fontURL: 'place/to/fonts'},
+            stylesheet: {insertType: 'none'}
+          })
+          .use(rehypeStringify)
+          .process(await fs.readFile(new URL('small.html', base)))
+      ),
+      String(await fs.readFile(new URL('small-chtml-none.html', base)))
     )
   })
 

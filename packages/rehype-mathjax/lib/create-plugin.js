@@ -91,6 +91,8 @@
  *   Configuration for the output, when SVG (optional).
  * @property {Readonly<InputTexOptions> | null | undefined} [tex]
  *   Configuration for the input TeX (optional).
+ * @property {Readonly<StylesheetOptions> | null | undefined} [stylesheet]
+ *   Configuration for the stylesheet (optional).
  *
  * @typedef OutputCHtmlOptions
  *   Configuration for output CHTML.
@@ -150,6 +152,15 @@
  * @property {number | null | undefined} [titleID]
  *   Initial ID number to use for `aria-labeledby` titles (optional).
  *
+ * @typedef StylesheetOptions
+ *   Configuration.
+ * @property {'internal'|'inline'|'none'|null|undefined} [insertType]
+ *   where to put the styles (optional).
+ *   - Default: `'internal'`.
+ *   - `'internal'`: in a `<style>` element. If possible, in the `<head>`.
+ *   - `'inline'`: in a `style` attribute.
+ *   - `'none'`: do not include styles.
+ *
  * @callback Render
  *   Render a math node.
  * @param {string} value
@@ -179,6 +190,8 @@
 
 import {toText} from 'hast-util-to-text'
 import {SKIP, visitParents} from 'unist-util-visit-parents'
+import {selectAll} from 'hast-util-select'
+import * as css from 'css'
 
 /** @type {Readonly<Options>} */
 const emptyOptions = {}
@@ -270,7 +283,51 @@ export function createPlugin(createRenderer) {
       })
 
       if (found && renderer.styleSheet) {
-        context.children.push(renderer.styleSheet())
+        const stylesheet = renderer.styleSheet()
+        if (options?.stylesheet?.insertType === 'inline') {
+          applyCss(tree, toText(stylesheet))
+        } else if (options?.stylesheet?.insertType === 'none') {
+          // Do nothing.
+        } else {
+          context.children.push(stylesheet)
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Transform.
+ *
+ * @param {Root} tree
+ *   Tree.
+ * @param {string} stylesheet
+ *   stylesheet written in CSS
+ * @returns {undefined}
+ *   Nothing.
+ */
+function applyCss(tree, stylesheet) {
+  const rules =
+    /** @type {(css.Rule | css.AtRule | css.Comment)[]} */
+    (css.parse(stylesheet).stylesheet?.rules)
+  for (const rule of rules) {
+    /* c8 ignore next -- to avoid the depth limit */
+    if (!('selectors' in rule) || !('declarations' in rule)) continue
+    const selectors =
+      /** @type {string[]} */
+      (rule.selectors)
+    for (const selector of selectors) {
+      const declarations =
+        /** @type {css.Declaration[]} */
+        (rule.declarations)
+      for (const declaration of declarations) {
+        /* c8 ignore next -- to avoid the depth limit */
+        if (!('property' in declaration)) continue
+        for (const element of selectAll(selector, tree)) {
+          element.properties ??= {}
+          element.properties.style ??= ''
+          element.properties.style += `${declaration.property}:${declaration.value};`
+        }
       }
     }
   }
